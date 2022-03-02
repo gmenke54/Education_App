@@ -1,7 +1,19 @@
 <template>
   <div v-if="this.students">
-    <div>{{this.title}}</div>
-    <DoughnutChart :chartData="edData" :options="this.options" />
+    <div>Our Students</div>
+    <div>
+      <div class="nut">{{this.title.display}}</div>
+      <DoughnutChart :chartData="edData" :options="this.options" />
+    </div>
+    <div class="btn-bar">
+      <div class="btn" @click="this.title={display: 'Middle Initial', data: 'initial'}">Middle Initial</div>
+      <div class="btn" @click="this.title={display: 'Last Name', data: 'l_name'}">Last Name</div>
+      <div class="btn" @click="this.title={display: 'Prefix', data: 'prefix'}">Prefix</div>
+      <div class="btn" @click="this.title={display: 'State', data: 'state'}">State</div>
+      <div class="btn" @click="this.title={display: 'Zip Code', data: 'zip'}">Zip Code</div>
+      <div class="btn" @click="this.title={display: 'Education Level', data: 'education'}">Education Level</div>
+      <div class="btn" @click="this.title={display: 'Income Level', data: 'income'}">Income Level</div>
+    </div>
   </div>
 </template>
 
@@ -18,7 +30,7 @@ export default {
   },
   data() {
     return {
-      title: 'Education',
+      title: {display: 'Education', data: 'education'},
       options: {
         plugins: {
           legend: {
@@ -38,25 +50,28 @@ export default {
   computed: {
     edData(){
       let edMap = {}
+      let curField = this.title.data
       for (let i=0; i<this.students.length; i++){
-        console.log(this.students[i])
-        if (!(this.students[i].education in edMap)){
-          console.log('not found')
-          edMap[this.students[i].education] = 1 
+        if (!(this.students[i][curField] in edMap)){
+          edMap[this.students[i][curField]] = 1 
         } else {
-          edMap[this.students[i].education]++
+          edMap[this.students[i][curField]]++
         }
       }
-      console.log(edMap)
       let labelsArr = [] 
       let dataArr = []
       let colorArr = []
       for (const property in edMap) {
-        labelsArr.push(property)
-        dataArr.push(edMap[property])
+        const string = property.toLowerCase()
+        const arr = string.split(" ")
+        for (let i=0; i<arr.length; i++){
+          arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+        }
+        const finalStr = arr.join(" ")
+        labelsArr.push(finalStr)
+        dataArr.push((100 * edMap[property]/this.students.length).toFixed(1))
         colorArr.push(`#${Math.floor(Math.random()*16777215).toString(16)}`)
       }
-      console.log(labelsArr, colorArr, dataArr)
       return {
         labels: labelsArr,
         datasets: [
