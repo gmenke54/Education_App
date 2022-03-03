@@ -1,6 +1,11 @@
 <template>
   <div class="cont" v-if="this.students">
-    <div class="title">Students</div>
+    <div class="toggle-cont">
+      <Toggle v-model="value" class="toggle" offLabel="#" onLabel="%"/>
+    </div>
+    <div class="nav">
+      <div class="title">Students</div>
+    </div>
     <div class="flex-row">
       <div class="btn-bar">
         <div class="btn" @click="this.title={display: 'Education Level', data: 'education'}, setActiv('education')" :class="education">Education Level</div>
@@ -21,10 +26,12 @@
 <script>
 import { DoughnutChart } from 'vue-chart-3';
 import axios from 'axios'
+import Toggle from '@vueform/toggle'
 export default {
   name: 'App',
   components: {
     DoughnutChart,
+    Toggle,
   },
   mounted(){
     this.getStudents()
@@ -37,8 +44,9 @@ export default {
           legend: {
             display: false
           }
-        }
+        },
       },
+      value: false,
       students: null,
       activ: 'education',
       initial: 'grey',
@@ -51,7 +59,7 @@ export default {
   },
   methods: {
     async getStudents(){
-      const res = await axios.get('http://localhost:3000/students/')
+      const res = await axios.get('https://ruby-api.herokuapp.com/students/')
       this.students = res.data
     },
     setActiv(level){
@@ -280,8 +288,20 @@ export default {
           arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
         }
         const finalStr = arr.join(" ")
-        labelsArr.push(`${finalStr} (%)`)
-        dataArr.push((100 * edMap[property]/this.students.length).toFixed(1))
+        if (this.value === false){
+          labelsArr.push(finalStr)
+        } else {
+          labelsArr.push(`${finalStr} (%)`)
+        }
+
+        if (this.value === false){
+          // Renders the number of students in each category:
+          dataArr.push(edMap[property])
+        } else {
+          // Renders the percentage of students in each category:
+          dataArr.push((100 * edMap[property]/this.students.length).toFixed(1))
+        }
+
         // Random Color from curated collection:
         colorArr.push(colorOptions[Math.floor(Math.random()*150)])
         // Random color from all possible hex codes:
@@ -352,6 +372,7 @@ body{
   padding: 5px;
   border-radius: 5px;
   background: white;
+  margin-top: 10px;
 }
 .flex-row{
   display: flex;
@@ -363,7 +384,6 @@ body{
   width: 100%
 }
 .title{
-  padding: 15px;
   color: black;
   font-size: 30px;
 }
@@ -376,4 +396,28 @@ body{
   align-items: center;
   width: 100%
 }
+.toggle{
+  --toggle-bg-on: #3181CE;
+  --toggle-ring-color: none;
+  --toggle-border-on:#3181CE;
+  --toggle-width: 3rem;
+}
+.nav{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background-color: white;
+  border-bottom: 0.5px solid #E7E9EB;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.toggle-cont{
+  position: fixed;
+  right: 15px;
+  top: 13px;
+}
 </style>
+
+<style src="@vueform/toggle/themes/default.css"></style>
